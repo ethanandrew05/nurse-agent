@@ -125,7 +125,7 @@
                 <a href="{{ url_for('index') }}" class="nav-item">ID</a>
                 <a href="#" class="nav-item">Forms</a>
                 <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item">Manual Database Entry System</a>
-                <a href="#" class="nav-item">Summary Report</a>
+                <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="nav-item">Summary Report</a>
                 <a href="#" class="nav-item">Transcript</a>
                 <a href="#" class="nav-item">AI Assistant</a>
             </nav>
@@ -137,9 +137,10 @@
             <div class="patient-header">
                 <h1>{{ patient.first_name }} {{ patient.last_name }}</h1>
                 <div class="patient-info">
-                    <span>AGE: {{ patient.age }}</span>
-                    <span>DOB: {{ patient.date_of_birth }}</span>
-                    <span>SEX: {{ patient.gender }}</span>
+                    <span>AGE: {{ patient.age if patient.age != None else 'Not specified' }}</span>
+                    <span>DOB: {{ patient.date_of_birth if patient.date_of_birth else 'Not specified' }}</span>
+                    <span>SEX: {{ patient.gender if patient.gender else 'Not specified' }}</span>
+                    <span>ID: {{ patient.id }}</span>
                 </div>
             </div>
 
@@ -318,8 +319,26 @@
 
         // Recording functionality
         let isRecording = false;
+        let checkProcessInterval = null;
         const recordButton = document.getElementById('recordButton');
         const recordStatus = document.getElementById('recordStatus');
+
+        async function checkRecordingProcess() {
+            try {
+                const response = await fetch('/check_recording_status');
+                const data = await response.json();
+                if (!data.is_recording && isRecording) {
+                    // Recording has stopped automatically
+                    isRecording = false;
+                    recordButton.classList.remove('recording');
+                    recordButton.textContent = 'REC';
+                    recordStatus.textContent = 'Recording stopped automatically. Processing...';
+                    clearInterval(checkProcessInterval);
+                }
+            } catch (error) {
+                console.error('Error checking recording status:', error);
+            }
+        }
 
         recordButton.addEventListener('click', async function() {
             if (!isRecording) {
@@ -337,6 +356,8 @@
                         recordButton.classList.add('recording');
                         recordButton.textContent = 'STOP';
                         recordStatus.textContent = 'Recording in progress...';
+                        // Start checking recording status every second
+                        checkProcessInterval = setInterval(checkRecordingProcess, 1000);
                     } else {
                         throw new Error('Failed to start recording');
                     }
@@ -359,6 +380,7 @@
                         recordButton.classList.remove('recording');
                         recordButton.textContent = 'REC';
                         recordStatus.textContent = 'Recording stopped. Processing...';
+                        clearInterval(checkProcessInterval);
                         
                         // Wait for transcription result
                         const transcriptionResponse = await response.json();
@@ -376,6 +398,55 @@
                 }
             }
         });
+
+        async function refreshPatientData() {
+            try {
+                const response = await fetch(`/get_patient_data/${patientData.id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    // Update the displayed information
+                    document.querySelector('.patient-header h1').textContent = `${data.first_name} ${data.last_name}`;
+                    const patientInfo = document.querySelector('.patient-info');
+                    patientInfo.innerHTML = `
+                        <span>AGE: ${data.age}</span>
+                        <span>DOB: ${data.date_of_birth}</span>
+                        <span>SEX: ${data.gender}</span>
+                        <span>ID: ${data.id}</span>
+                    `;
+                    
+                    // Update other fields
+                    if (data.medical_history) {
+                        document.querySelector('.medical-history p').textContent = data.medical_history;
+                    }
+                    if (data.medications) {
+                        document.querySelector('.medications p').textContent = data.medications;
+                    }
+                    if (data.allergies) {
+                        document.querySelector('.allergies p').textContent = data.allergies;
+                    }
+                    if (data.notes) {
+                        document.querySelector('.notes p').textContent = data.notes;
+                    }
+                    
+                    // Update patientData object
+                    Object.assign(patientData, data);
+                    
+                    // Refresh alerts
+                    const alerts = gatherImportantInformation();
+                    const importantInfoBox = document.querySelector('.info-box.important-info p');
+                    if (alerts.length > 0) {
+                        importantInfoBox.innerHTML = alerts.map(alert => `<p>• ${alert}</p>`).join('');
+                    } else {
+                        importantInfoBox.innerHTML = '<p>No critical information to display.</p>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error refreshing patient data:', error);
+            }
+        }
+
+        // Refresh data every 30 seconds
+        setInterval(refreshPatientData, 30000);
     </script>
 </body>
 </html> 

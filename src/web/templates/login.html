@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nurse Agent - Patient ID</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .button-container {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .create-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .create-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
@@ -17,12 +42,20 @@
                 {% if error %}
                 <div class="error-message">{{ error }}</div>
                 {% endif %}
+                {% if success %}
+                <div class="success-message">{{ success }}</div>
+                {% endif %}
                 <div class="input-group">
                     <input type="text" id="patient_id" name="patient_id" required 
                            placeholder="Patient ID" autocomplete="off">
                 </div>
                 <button type="submit" class="submit-btn">Access Patient Records</button>
             </form>
+            <div class="button-container">
+                <form action="{{ url_for('create_new_patient') }}" method="POST">
+                    <button type="submit" class="create-btn">Create New Patient</button>
+                </form>
+            </div>
         </div>
     </div>
 </body>

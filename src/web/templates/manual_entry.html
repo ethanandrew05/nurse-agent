@@ -34,7 +34,7 @@
             </div>
 
             <!-- Manual Entry Form -->
-            <form action="{{ url_for('update_patient', patient_id=patient.id) }}" method="POST" class="entry-form">
+            <form action="{{ url_for('update_patient', patient_id=patient.id) }}" method="POST" class="entry-form" onsubmit="handleSubmit(event)">
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="first_name">First Name</label>
@@ -44,11 +44,6 @@
                     <div class="form-group">
                         <label for="last_name">Last Name</label>
                         <input type="text" id="last_name" name="last_name" value="{{ patient.last_name }}">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="age">Age</label>
-                        <input type="number" id="age" name="age" value="{{ patient.age }}">
                     </div>
 
                     <div class="form-group">
@@ -119,5 +114,31 @@
             </form>
         </div>
     </div>
+
+    <script>
+    async function handleSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            });
+            
+            if (response.ok) {
+                // Redirect to dashboard with a small delay to allow database update
+                setTimeout(() => {
+                    window.location.href = "{{ url_for('dashboard', patient_id=patient.id) }}";
+                }, 500);
+            } else {
+                alert('Error updating patient record');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error updating patient record');
+        }
+    }
+    </script>
 </body>
 </html> 

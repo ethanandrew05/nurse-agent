@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summary Report - {{ patient.first_name }} {{ patient.last_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <style>
+        .report-container {
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .generate-btn {
+            background-color: #40B3A2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .generate-btn:hover {
+            background-color: #359385;
+        }
+
+        .download-btn {
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background-color: #357ABD;
+        }
+
+        .download-btn.disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #reportContent {
+            min-height: 200px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <div class="hospital-logo">Hospital Logo</div>
+            <nav class="nav-menu">
+                <a href="{{ url_for('index') }}" class="nav-item">ID</a>
+                <a href="#" class="nav-item">Forms</a>
+                <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item">Manual Database Entry System</a>
+                <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="nav-item active">Summary Report</a>
+                <a href="#" class="nav-item">Transcript</a>
+                <a href="#" class="nav-item">AI Assistant</a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Patient Header -->
+            <div class="patient-header">
+                <h1>{{ patient.first_name }} {{ patient.last_name }} - Summary Report</h1>
+                <div class="patient-info">
+                    <span>AGE: {{ patient.age if patient.age != None else 'Not specified' }}</span>
+                    <span>DOB: {{ patient.date_of_birth if patient.date_of_birth else 'Not specified' }}</span>
+                    <span>SEX: {{ patient.gender if patient.gender else 'Not specified' }}</span>
+                    <span>ID: {{ patient.id }}</span>
+                </div>
+            </div>
+
+            <!-- Report Actions -->
+            <div class="report-actions">
+                <button id="generateBtn" class="generate-btn" onclick="generateReport()">
+                    <span>Generate Report</span>
+                </button>
+                <a id="downloadBtn" href="#" class="download-btn disabled" onclick="return false;">
+                    <span>Download PDF</span>
+                </a>
+            </div>
+
+            <!-- Report Content -->
+            <div class="report-container">
+                <div id="reportContent">
+                    Click "Generate Report" to create a summary report of the patient's information and transcript.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function generateReport() {
+            const generateBtn = document.getElementById('generateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const reportContent = document.getElementById('reportContent');
+            
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<span>Generating...</span>';
+            
+            try {
+                const response = await fetch(`/generate_report/${patientData.id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    reportContent.textContent = data.report;
+                    
+                    // Enable PDF download
+                    downloadBtn.classList.remove('disabled');
+                    downloadBtn.href = `/download_report/${patientData.id}`;
+                    downloadBtn.onclick = null;
+                } else {
+                    reportContent.textContent = 'Error generating report. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                reportContent.textContent = 'Error generating report. Please try again.';
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<span>Generate Report</span>';
+            }
+        }
+
+        // Initialize patient data from server-side
+        const patientData = {
+            id: "{{ patient.id }}"
+        };
+    </script>
+</body>
+</html> 
