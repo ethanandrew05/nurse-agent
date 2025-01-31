@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nurse Agent - Patient ID</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="hospital-logo">
+                <h1>Hospital Logo</h1>
+            </div>
+            <form action="{{ url_for('verify_patient') }}" method="POST" class="login-form">
+                <h2>Enter Patient ID</h2>
+                {% if error %}
+                <div class="error-message">{{ error }}</div>
+                {% endif %}
+                <div class="input-group">
+                    <input type="text" id="patient_id" name="patient_id" required 
+                           placeholder="Patient ID" autocomplete="off">
+                </div>
+                <button type="submit" class="submit-btn">Access Patient Records</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <style>
+        .alert-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .alert-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+            z-index: 1001;
+        }
+
+        .alert-title {
+            color: #d32f2f;
+            font-size: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-content {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .alert-close {
+            background-color: #40B3A2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+        }
+
+        .alert-close:hover {
+            background-color: #359385;
+        }
+
+        .record-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #ff4444;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .record-button.recording {
+            background-color: #666;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        .record-status {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Alert Overlay -->
+    <div id="alertOverlay" class="alert-overlay">
+        <div class="alert-box">
+            <div class="alert-title">
+                ⚠️ IMPORTANT INFORMATION
+            </div>
+            <div id="alertContent" class="alert-content">
+            </div>
+            <button class="alert-close" onclick="closeAlert()">Acknowledge</button>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <div class="hospital-logo">Hospital Logo</div>
+            <nav class="nav-menu">
+                <a href="{{ url_for('index') }}" class="nav-item">ID</a>
+                <a href="#" class="nav-item">Forms</a>
+                <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item">Manual Database Entry System</a>
+                <a href="#" class="nav-item">Summary Report</a>
+                <a href="#" class="nav-item">Transcript</a>
+                <a href="#" class="nav-item">AI Assistant</a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Patient Header -->
+            <div class="patient-header">
+                <h1>{{ patient.first_name }} {{ patient.last_name }}</h1>
+                <div class="patient-info">
+                    <span>AGE: {{ patient.age }}</span>
+                    <span>DOB: {{ patient.date_of_birth }}</span>
+                    <span>SEX: {{ patient.gender }}</span>
+                </div>
+            </div>
+
+            <!-- Information Grid -->
+            <div class="info-grid">
+                <div class="info-box important-info">
+                    <h2>IMPORTANT INFORMATION</h2>
+                    <p>{{ patient.notes }}</p>
+                </div>
+
+                <div class="info-box medical-history">
+                    <h2>Medical History</h2>
+                    <p>{{ patient.medical_history }}</p>
+                </div>
+
+                <div class="info-box medications">
+                    <h2>Medications</h2>
+                    <p>{{ patient.medications }}</p>
+                </div>
+
+                <div class="info-box allergies">
+                    <h2>Allergies</h2>
+                    <p>{{ patient.allergies }}</p>
+                </div>
+
+                <div class="info-box notes">
+                    <h2>Notes</h2>
+                    <p>{{ patient.notes }}</p>
+                </div>
+            </div>
+
+            <!-- Record Button Section -->
+            <div class="record-section">
+                <button id="recordButton" class="record-button">
+                    REC
+                </button>
+                <div id="recordStatus" class="record-status">Click to start recording</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showAlert(alerts) {
+            if (alerts && alerts.length > 0) {
+                // Update popup content
+                const alertContent = document.getElementById('alertContent');
+                alertContent.innerHTML = alerts.map(alert => `<p>• ${alert}</p>`).join('');
+                document.getElementById('alertOverlay').style.display = 'block';
+                
+                // Update dashboard's Important Information section
+                const importantInfoBox = document.querySelector('.info-box.important-info p');
+                importantInfoBox.innerHTML = alerts.map(alert => `<p>• ${alert}</p>`).join('');
+            }
+        }
+
+        function closeAlert() {
+            document.getElementById('alertOverlay').style.display = 'none';
+        }
+
+        // Initialize patient data from server-side
+        const patientData = {
+            id: "{{ patient.id }}",
+            allergies: "{{ patient.allergies | default('', true) | replace('\n', ' ') | replace('\"', '\'') }}",
+            medicalHistory: "{{ patient.medical_history | default('', true) | replace('\n', ' ') | replace('\"', '\'') }}",
+            familyHistory: "{{ patient.family_history | default('', true) | replace('\n', ' ') | replace('\"', '\'') }}",
+            medications: "{{ patient.medications | default('', true) | replace('\n', ' ') | replace('\"', '\'') }}"
+        };
+
+        // Lists of critical conditions and medications
+        const criticalConditions = {
+            cardiac: ['heart', 'cardiac', 'hypertension', 'high blood pressure', 'arrhythmia', 'angina'],
+            respiratory: ['asthma', 'copd', 'emphysema', 'respiratory failure'],
+            neurological: ['seizure', 'epilepsy', 'stroke', 'tia', 'brain injury'],
+            endocrine: ['diabetes', 'thyroid', 'adrenal'],
+            cancer: ['cancer', 'tumor', 'malignant', 'leukemia', 'lymphoma'],
+            immunological: ['immunocompromised', 'hiv', 'aids', 'lupus', 'autoimmune'],
+            psychiatric: ['suicidal', 'schizophrenia', 'bipolar', 'severe depression'],
+            infectious: ['mrsa', 'tuberculosis', 'hepatitis', 'covid']
+        };
+
+        const highRiskMedications = [
+            'warfarin', 'coumadin', 'heparin',  // Blood thinners
+            'insulin', 'metformin',             // Diabetes
+            'morphine', 'oxycodone', 'fentanyl', // Opioids
+            'lithium', 'clozapine',             // Psychiatric
+            'chemotherapy', 'immunosuppressant', // Cancer/Immune
+            'digoxin', 'amiodarone'             // Heart
+        ];
+
+        const criticalAllergies = [
+            'penicillin', 'sulfa', 'aspirin', 'nsaid', 'latex', 'iodine', 'contrast'
+        ];
+
+        // Function to gather important information
+        function gatherImportantInformation() {
+            const alerts = [];
+            
+            // Check allergies - only highlight critical ones
+            if (patientData.allergies) {
+                const allergyText = patientData.allergies.toLowerCase();
+                const foundCriticalAllergies = criticalAllergies.filter(allergy => 
+                    allergyText.includes(allergy.toLowerCase())
+                );
+                
+                if (foundCriticalAllergies.length > 0) {
+                    alerts.push(`<strong>⚠️ CRITICAL ALLERGIES:</strong> ${patientData.allergies}`);
+                }
+            }
+
+            // Check medical history for critical conditions
+            if (patientData.medicalHistory) {
+                const medHistory = patientData.medicalHistory.toLowerCase();
+                const foundConditions = [];
+                
+                for (const [system, conditions] of Object.entries(criticalConditions)) {
+                    if (conditions.some(condition => medHistory.includes(condition))) {
+                        foundConditions.push(system);
+                    }
+                }
+                
+                if (foundConditions.length > 0) {
+                    alerts.push(`<strong>⚠️ CRITICAL MEDICAL HISTORY (${foundConditions.join(', ')}):</strong> ${patientData.medicalHistory}`);
+                }
+            }
+
+            // Check family history - only if it contains critical conditions
+            if (patientData.familyHistory) {
+                const famHistory = patientData.familyHistory.toLowerCase();
+                const foundFamilyConditions = [];
+                
+                for (const [system, conditions] of Object.entries(criticalConditions)) {
+                    if (conditions.some(condition => famHistory.includes(condition))) {
+                        foundFamilyConditions.push(system);
+                    }
+                }
+                
+                if (foundFamilyConditions.length > 0) {
+                    alerts.push(`<strong>RELEVANT FAMILY HISTORY (${foundFamilyConditions.join(', ')}):</strong> ${patientData.familyHistory}`);
+                }
+            }
+
+            // Check current medications - only highlight high-risk ones
+            if (patientData.medications) {
+                const medsText = patientData.medications.toLowerCase();
+                const foundHighRiskMeds = highRiskMedications.filter(med => 
+                    medsText.includes(med.toLowerCase())
+                );
+                
+                if (foundHighRiskMeds.length > 0) {
+                    alerts.push(`<strong>⚠️ HIGH-RISK MEDICATIONS:</strong> ${patientData.medications}`);
+                }
+            }
+
+            return alerts;
+        }
+
+        // Check for important information when page loads
+        window.onload = function() {
+            const alerts = gatherImportantInformation();
+            
+            // Always update the dashboard's Important Information section
+            const importantInfoBox = document.querySelector('.info-box.important-info p');
+            if (alerts.length > 0) {
+                importantInfoBox.innerHTML = alerts.map(alert => `<p>• ${alert}</p>`).join('');
+            } else {
+                importantInfoBox.innerHTML = '<p>No critical information to display.</p>';
+            }
+
+            // Only show the popup if we haven't shown it before for this patient
+            const alertShownKey = `alertShown_patient_${patientData.id}`;
+            if (!sessionStorage.getItem(alertShownKey) && alerts.length > 0) {
+                showAlert(alerts);
+                sessionStorage.setItem(alertShownKey, 'true');
+            }
+        };
+
+        // Recording functionality
+        let isRecording = false;
+        const recordButton = document.getElementById('recordButton');
+        const recordStatus = document.getElementById('recordStatus');
+
+        recordButton.addEventListener('click', async function() {
+            if (!isRecording) {
+                // Start recording
+                try {
+                    const response = await fetch(`/start_recording/${patientData.id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (response.ok) {
+                        isRecording = true;
+                        recordButton.classList.add('recording');
+                        recordButton.textContent = 'STOP';
+                        recordStatus.textContent = 'Recording in progress...';
+                    } else {
+                        throw new Error('Failed to start recording');
+                    }
+                } catch (error) {
+                    console.error('Error starting recording:', error);
+                    recordStatus.textContent = 'Error starting recording';
+                }
+            } else {
+                // Stop recording
+                try {
+                    const response = await fetch('/stop_recording', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (response.ok) {
+                        isRecording = false;
+                        recordButton.classList.remove('recording');
+                        recordButton.textContent = 'REC';
+                        recordStatus.textContent = 'Recording stopped. Processing...';
+                        
+                        // Wait for transcription result
+                        const transcriptionResponse = await response.json();
+                        if (transcriptionResponse.status === 'success') {
+                            recordStatus.textContent = 'Recording processed successfully';
+                        } else {
+                            recordStatus.textContent = 'Error processing recording';
+                        }
+                    } else {
+                        throw new Error('Failed to stop recording');
+                    }
+                } catch (error) {
+                    console.error('Error stopping recording:', error);
+                    recordStatus.textContent = 'Error stopping recording';
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

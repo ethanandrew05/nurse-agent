@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Entry - {{ patient.first_name }} {{ patient.last_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manual_entry.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <div class="hospital-logo">Hospital Logo</div>
+            <nav class="nav-menu">
+                <a href="{{ url_for('index') }}" class="nav-item">ID</a>
+                <a href="#" class="nav-item">Forms</a>
+                <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item active">Manual Database Entry System</a>
+                <a href="#" class="nav-item">Summary Report</a>
+                <a href="#" class="nav-item">Transcript</a>
+                <a href="#" class="nav-item">AI Assistant</a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Patient Header -->
+            <div class="patient-header">
+                <h1>Update Patient Information</h1>
+                <div class="patient-info">
+                    <span>Patient: {{ patient.first_name }} {{ patient.last_name }}</span>
+                    <span>ID: {{ patient.id }}</span>
+                </div>
+            </div>
+
+            <!-- Manual Entry Form -->
+            <form action="{{ url_for('update_patient', patient_id=patient.id) }}" method="POST" class="entry-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name" value="{{ patient.first_name }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" value="{{ patient.last_name }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" value="{{ patient.age }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <input type="text" id="gender" name="gender" value="{{ patient.gender }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth</label>
+                        <input type="date" id="date_of_birth" name="date_of_birth" value="{{ patient.date_of_birth }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vital_signs">Vital Signs</label>
+                        <input type="text" id="vital_signs" name="vital_signs" value="{{ patient.vital_signs }}">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="symptoms">Symptoms</label>
+                        <textarea id="symptoms" name="symptoms">{{ patient.symptoms }}</textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="medications">Medications</label>
+                        <textarea id="medications" name="medications">{{ patient.medications }}</textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="allergies">Allergies</label>
+                        <textarea id="allergies" name="allergies">{{ patient.allergies }}</textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="medical_history">Medical History</label>
+                        <textarea id="medical_history" name="medical_history">{{ patient.medical_history }}</textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="family_history">Family History</label>
+                        <textarea id="family_history" name="family_history">{{ patient.family_history }}</textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="diagnosis">Diagnosis</label>
+                        <textarea id="diagnosis" name="diagnosis">{{ patient.diagnosis }}</textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="treatment_plan">Treatment Plan</label>
+                        <textarea id="treatment_plan" name="treatment_plan">{{ patient.treatment_plan }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="follow_up_date">Follow-up Date</label>
+                        <input type="date" id="follow_up_date" name="follow_up_date" value="{{ patient.follow_up_date }}">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" name="notes">{{ patient.notes }}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">Update Patient Record</button>
+                    <a href="{{ url_for('dashboard', patient_id=patient.id) }}" class="cancel-btn">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html> 
