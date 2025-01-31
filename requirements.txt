@@ -1,0 +1,25 @@
+# Speech recognition and audio processing
+SpeechRecognition>=3.10.0
+pyaudio>=0.2.13
+sounddevice>=0.4.6
+
+# NLP and ML libraries
+spacy>=3.7.2
+transformers>=4.36.0
+torch>=2.1.0
+nltk>=3.8.1
+
+# Web framework and API
+fastapi>=0.104.0
+uvicorn>=0.24.0
+python-multipart>=0.0.6
+
+# Data processing and utilities
+numpy>=1.24.0
+pandas>=2.1.0
+python-dotenv>=1.0.0
+
+# Security
+cryptography>=41.0.0
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4 
