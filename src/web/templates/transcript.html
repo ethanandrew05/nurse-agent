@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcripts - {{ patient.first_name }} {{ patient.last_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <style>
+        .transcript-container {
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .transcript-entry {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #40B3A2;
+        }
+
+        .transcript-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .transcript-timestamp {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .transcript-content {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .analysis-section {
+            background-color: #f0f7f6;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .analysis-title {
+            color: #2c3e50;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .key-points {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .key-points li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .key-points li:before {
+            content: "•";
+            color: #40B3A2;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .no-transcripts {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .filter-controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .date-filter {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .export-btn {
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .export-btn:hover {
+            background-color: #357ABD;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .file-list {
+            margin-top: 20px;
+        }
+        .file-entry {
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+        }
+        .file-entry:hover {
+            background-color: #e9ecef;
+            transform: translateX(5px);
+        }
+        .file-entry a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-size: 16px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <div class="hospital-logo">Hospital Logo</div>
+            <nav class="nav-menu">
+                <a href="{{ url_for('index') }}" class="nav-item">ID</a>
+                <a href="#" class="nav-item">Forms</a>
+                <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item">Manual Database Entry System</a>
+                <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="nav-item">Summary Report</a>
+                <a href="{{ url_for('transcript', patient_id=patient.id) }}" class="nav-item active">Transcript</a>
+                <a href="#" class="nav-item">AI Assistant</a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Patient Header -->
+            <div class="patient-header">
+                <h1>{{ patient.first_name }} {{ patient.last_name }} - Transcripts</h1>
+                <div class="patient-info">
+                    <span>AGE: {{ patient.age if patient.age != None else 'Not specified' }}</span>
+                    <span>DOB: {{ patient.date_of_birth if patient.date_of_birth else 'Not specified' }}</span>
+                    <span>SEX: {{ patient.gender if patient.gender else 'Not specified' }}</span>
+                    <span>ID: {{ patient.id }}</span>
+                </div>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="filter-controls">
+                <input type="date" class="date-filter" id="startDate" onchange="filterTranscripts()">
+                <input type="date" class="date-filter" id="endDate" onchange="filterTranscripts()">
+                <button class="export-btn" onclick="exportTranscripts()">Export All</button>
+            </div>
+
+            <!-- Transcripts Container -->
+            <div class="transcript-container">
+                <h2>Output Files</h2>
+                <div class="file-list">
+                    {% if output_files %}
+                        {% for file in output_files %}
+                            <div class="file-entry">
+                                <a href="{{ url_for('serve_file', filename=file) }}" target="_blank">
+                                    {% if file.endswith('.txt') %}
+                                        📄 
+                                    {% else %}
+                                        📊 
+                                    {% endif %}
+                                    {{ file }}
+                                </a>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-transcripts">
+                            No files available.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filterTranscripts() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const entries = document.querySelectorAll('.transcript-entry');
+
+            entries.forEach(entry => {
+                const entryDate = entry.dataset.date.split(' ')[0]; // Get just the date part
+                if ((!startDate || entryDate >= startDate) && (!endDate || entryDate <= endDate)) {
+                    entry.style.display = 'block';
+                } else {
+                    entry.style.display = 'none';
+                }
+            });
+        }
+
+        async function exportTranscripts() {
+            try {
+                const response = await fetch(`/export_transcripts/${patientData.id}`);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `transcripts_${patientData.first_name}_${patientData.last_name}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    alert('Error exporting transcripts');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error exporting transcripts');
+            }
+        }
+
+        // Initialize patient data from server-side
+        const patientData = {
+            id: "{{ patient.id }}",
+            first_name: "{{ patient.first_name }}",
+            last_name: "{{ patient.last_name }}"
+        };
+    </script>
+</body>
+</html> 

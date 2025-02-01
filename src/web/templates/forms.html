@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forms - {{ patient.first_name }} {{ patient.last_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <style>
+        .form-button {
+            padding: 15px 30px;
+            font-size: 16px;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-button:hover {
+            background-color: #45a049;
+        }
+
+        .pdf-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .pdf-content {
+            position: relative;
+            width: 80%;
+            height: 90vh;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            color: black;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <div class="hospital-logo">Hospital Logo</div>
+            <nav class="nav-menu">
+                <a href="{{ url_for('index') }}" class="nav-item">ID</a>
+                <a href="{{ url_for('forms', patient_id=patient.id) }}" class="nav-item active">Forms</a>
+                <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item">Manual Database Entry System</a>
+                <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="nav-item">Summary Report</a>
+                <a href="{{ url_for('transcript', patient_id=patient.id) }}" class="nav-item">Transcript</a>
+                <a href="{{ url_for('ai_assistant', patient_id=patient.id) }}" class="nav-item">AI Assistant</a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Patient Header -->
+            <div class="patient-header">
+                <h1>{{ patient.first_name }} {{ patient.last_name }} - Forms</h1>
+                <div class="patient-info">
+                    <span>AGE: {{ patient.age if patient.age != None else 'Not specified' }}</span>
+                    <span>DOB: {{ patient.date_of_birth if patient.date_of_birth else 'Not specified' }}</span>
+                    <span>SEX: {{ patient.gender if patient.gender else 'Not specified' }}</span>
+                    <span>ID: {{ patient.id }}</span>
+                </div>
+            </div>
+
+            <!-- Medical Forms Buttons -->
+            <div class="forms-buttons">
+                <button class="form-button" onclick="openPDF('{{ url_for('static', filename='pdfs/form-sf-93-report-of-medical-history.pdf') }}')">Report of Medical History</button>
+                <button class="form-button" onclick="openPDF('{{ url_for('static', filename='pdfs/form-new-patient-medical-history.pdf') }}')">New Patient Medical History</button>
+                <button class="form-button" onclick="openPDF('{{ url_for('static', filename='pdfs/vaccine_administration_for_adults.pdf') }}')">Medical Administration Record</button>
+            </div>
+
+            <!-- PDF Viewer -->
+            <div class="pdf-viewer" style="display:none;">
+                <div class="close" onclick="closePDF()" style="position: absolute; top: 170px; right: 20px; font-size: 20px; cursor: pointer;">&times;</div>
+                <iframe id="pdfViewer" src="" width="100%" height="1200px" style="border:none;"></iframe>
+            </div>
+
+            <script>
+                function openPDF(pdfFile) {
+                    document.getElementById('pdfViewer').src = pdfFile;
+                    document.querySelector('.pdf-viewer').style.display = 'block';
+                }
+
+                function closePDF() {
+                    document.getElementById('pdfViewer').src = '';
+                    document.querySelector('.pdf-viewer').style.display = 'none';
+                }
+            </script>
+        </div>
+    </div>
+</body>
+</html> 

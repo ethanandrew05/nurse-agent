@@ -101,6 +101,24 @@
             margin-top: 10px;
             font-weight: bold;
             color: #666;
+            padding: 10px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .record-status.processing {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .record-status.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .record-status.error {
+            background-color: #f8d7da;
+            color: #721c24;
         }
     </style>
 </head>
@@ -123,11 +141,11 @@
             <div class="hospital-logo">Hospital Logo</div>
             <nav class="nav-menu">
                 <a href="{{ url_for('index') }}" class="nav-item">ID</a>
-                <a href="#" class="nav-item">Forms</a>
+                <a href="{{ url_for('forms', patient_id=patient.id) }}" class="nav-item">Forms</a>
                 <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item">Manual Database Entry System</a>
                 <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="nav-item">Summary Report</a>
-                <a href="#" class="nav-item">Transcript</a>
-                <a href="#" class="nav-item">AI Assistant</a>
+                <a href="{{ url_for('transcript', patient_id=patient.id) }}" class="nav-item">Transcript</a>
+                <a href="{{ url_for('ai_assistant', patient_id=patient.id) }}" class="nav-item">AI Assistant</a>
             </nav>
         </div>
 
