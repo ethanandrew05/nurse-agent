@@ -85,9 +85,9 @@
 
             <!-- Medical Forms Buttons -->
             <div class="forms-buttons">
-                <button class="form-button" onclick="openPDF('{{ url_for('static', filename='pdfs/form-sf-93-report-of-medical-history.pdf') }}')">Report of Medical History</button>
-                <button class="form-button" onclick="openPDF('{{ url_for('static', filename='pdfs/form-new-patient-medical-history.pdf') }}')">New Patient Medical History</button>
-                <button class="form-button" onclick="openPDF('{{ url_for('static', filename='pdfs/vaccine_administration_for_adults.pdf') }}')">Medical Administration Record</button>
+                <button class="form-button" data-pdf="form-sf-93-report-of-medical-history.pdf">Report of Medical History</button>
+                <button class="form-button" data-pdf="form-new-patient-medical-history.pdf">New Patient Medical History</button>
+                <button class="form-button" data-pdf="vaccine_administration_for_adults.pdf">Medical Administration Record</button>
             </div>
 
             <!-- PDF Viewer -->
@@ -106,6 +106,14 @@
                     document.getElementById('pdfViewer').src = '';
                     document.querySelector('.pdf-viewer').style.display = 'none';
                 }
+
+                // Add click event listeners to all form buttons
+                document.querySelectorAll('.form-button').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const pdfFile = this.getAttribute('data-pdf');
+                        openPDF(`{{ url_for('static', filename='pdfs/') }}${pdfFile}`);
+                    });
+                });
             </script>
         </div>
     </div>

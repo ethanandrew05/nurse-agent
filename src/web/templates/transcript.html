@@ -145,11 +145,11 @@
             <div class="hospital-logo">Hospital Logo</div>
             <nav class="nav-menu">
                 <a href="{{ url_for('index') }}" class="nav-item">ID</a>
-                <a href="#" class="nav-item">Forms</a>
+                <a href="{{ url_for('forms', patient_id=patient.id) }}" class="nav-item">Forms</a>
                 <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item">Manual Database Entry System</a>
                 <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="nav-item">Summary Report</a>
                 <a href="{{ url_for('transcript', patient_id=patient.id) }}" class="nav-item active">Transcript</a>
-                <a href="#" class="nav-item">AI Assistant</a>
+                <a href="{{ url_for('ai_assistant', patient_id=patient.id) }}" class="nav-item">AI Assistant</a>
             </nav>
         </div>
 
