@@ -10,29 +10,36 @@ class ChatService:
                 "content": """You are an AI medical assistant helping healthcare professionals. 
                 You have access to patient records and can help answer questions about the patient's 
                 medical history, current condition, and treatment plans. Always maintain a professional 
-                and clinical tone, and be sure to reference relevant patient information when appropriate."""
+                and clinical tone, and be sure to reference relevant patient information as much as possible."""
             }
         ]
 
     def send_message(self, message, patient_context=None):
         try:
+            # Debugging: Print patient context
+            print("Patient Context:", patient_context)
+            
+            # Debugging: Print date of birth
+            print("Date of Birth:", patient_context.get('date_of_birth'))
+            
             # If patient context is provided, add it to the message
             if patient_context:
                 context_message = {
                     "role": "system",
                     "content": f"""Current patient information:
-                    Name: {patient_context.get('firstName')} {patient_context.get('lastName')}
+                    Name: {patient_context.get('first_name')} {patient_context.get('last_name')}
                     Age: {patient_context.get('age')}
                     Gender: {patient_context.get('gender')}
                     Current Symptoms: {patient_context.get('symptoms')}
-                    Vital Signs: {patient_context.get('vitalSigns')}
+                    Vital Signs: {patient_context.get('vital_signs')}
                     Medications: {patient_context.get('medications')}
                     Allergies: {patient_context.get('allergies')}
-                    Medical History: {patient_context.get('medicalHistory')}
-                    Family History: {patient_context.get('familyHistory')}
+                    Medical History: {patient_context.get('medical_history')}
+                    Family History: {patient_context.get('family_history')}
                     Current Diagnosis: {patient_context.get('diagnosis')}
-                    Treatment Plan: {patient_context.get('treatmentPlan')}
-                    Notes: {patient_context.get('notes')}"""
+                    Treatment Plan: {patient_context.get('treatment_plan')}
+                    Notes: {patient_context.get('notes')}
+                    Date of Birth: {patient_context.get('date_of_birth')}"""
                 }
                 self.conversation_history.append(context_message)
 
