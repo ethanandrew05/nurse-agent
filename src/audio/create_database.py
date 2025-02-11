@@ -1,11 +1,28 @@
 import sqlite3
+import os
 from datetime import datetime
+
+# Get the absolute path to the database
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE_PATH = os.path.join(SCRIPT_DIR, 'medical_records.db')
+
+def calculate_age(date_of_birth):
+    """Calculate age from date of birth."""
+    if not date_of_birth:
+        return None
+    try:
+        dob = datetime.strptime(date_of_birth, '%Y-%m-%d')
+        today = datetime.now()
+        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+        return age
+    except (ValueError, TypeError):
+        return None
 
 def create_database():
     """Create the SQLite database with all necessary tables."""
     
     # Connect to SQLite database (creates it if it doesn't exist)
-    conn = sqlite3.connect('medical_records.db')
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     
     # Create the patients table if it doesn't exist
@@ -14,9 +31,8 @@ def create_database():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         first_name TEXT,
         last_name TEXT,
-        age INTEGER,
-        gender TEXT,
         date_of_birth DATE,
+        gender TEXT,
         symptoms TEXT,
         vital_signs TEXT,
         medications TEXT,
@@ -32,7 +48,24 @@ def create_database():
     )
     ''')
     
-    # Create a trigger to update the updated_at timestamp if it doesn't exist
+    # Create a view for patient records that includes calculated age
+    cursor.execute('''
+    DROP VIEW IF EXISTS patient_records_with_age;
+    ''')
+    
+    cursor.execute('''
+    CREATE VIEW patient_records_with_age AS
+    SELECT 
+        *,
+        CASE 
+            WHEN date_of_birth IS NOT NULL THEN
+                (CAST(strftime('%Y.%m%d', 'now') - strftime('%Y.%m%d', date_of_birth) AS INTEGER))
+            ELSE NULL
+        END as age
+    FROM patient_records;
+    ''')
+    
+    # Create a trigger to update the updated_at timestamp
     cursor.execute('''
     CREATE TRIGGER IF NOT EXISTS update_patient_timestamp 
     AFTER UPDATE ON patient_records
@@ -42,6 +75,27 @@ def create_database():
     END;
     ''')
     
+    # Check if we need to add a test patient
+    cursor.execute("SELECT COUNT(*) FROM patient_records")
+    count = cursor.fetchone()[0]
+    
+    if count == 0:
+        # Add a test patient
+        cursor.execute('''
+        INSERT INTO patient_records (
+            first_name, last_name, date_of_birth, gender,
+            symptoms, vital_signs, medications, allergies,
+            medical_history, family_history, diagnosis,
+            treatment_plan, follow_up_date, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            'John', 'Doe', '1979-01-15', 'Male',
+            'Headache, Fever', 'BP 120/80, Temp 38.5°C', 'Aspirin',
+            'Penicillin', 'Hypertension', 'Father: Heart Disease',
+            'Common Cold', 'Rest and fluids', '2024-02-15',
+            'Patient reports feeling better'
+        ))
+    
     # Commit the changes and close the connection
     conn.commit()
     conn.close()
@@ -49,6 +103,7 @@ def create_database():
 def update_record(patient_id: int, data: dict):
     """
     Update an existing patient record in the database.
+    Appends new data to existing fields without duplicating information.
     
     Args:
         patient_id: ID of the patient to update
@@ -59,48 +114,86 @@ def update_record(patient_id: int, data: dict):
         print("No data to update (all values are null)")
         return
         
-    conn = sqlite3.connect('medical_records.db')
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     
     # Check if patient exists
-    cursor.execute('SELECT id FROM patient_records WHERE id = ?', (patient_id,))
-    if not cursor.fetchone():
+    cursor.execute('SELECT * FROM patient_records WHERE id = ?', (patient_id,))
+    current_record = cursor.fetchone()
+    if not current_record:
         print(f"No patient found with ID {patient_id}")
         conn.close()
         return
     
-    # Prepare the fields and values for update
-    updates = []
-    values = []
+    # Convert current record to dictionary
+    columns = [description[0] for description in cursor.description]
+    current_data = dict(zip(columns, current_record))
     
-    for field, value in data.items():
-        if value is not None:  # Only include non-null values
-            updates.append(f"{field} = ?")
-            values.append(value)
+    # List of fields that should never be updated from transcripts
+    protected_fields = ['id', 'first_name', 'last_name', 'date_of_birth', 'gender', 'created_at', 'updated_at']
     
-    # If no fields to update, return
-    if not updates:
-        print("No fields to update")
-        conn.close()
-        return
+    # Filter out protected fields and prepare updates
+    update_data = {}
+    for key, new_value in data.items():
+        if key in protected_fields or new_value is None:
+            continue
+            
+        current_value = current_data.get(key)
+        if current_value and key != 'notes':  # Notes are handled separately
+            # Split both current and new values into individual items
+            current_items = {item.strip().lower() for item in str(current_value).split(',')}
+            new_items = {item.strip().lower() for item in str(new_value).split(',')}
+            
+            # Only add items that don't exist (case-insensitive comparison)
+            new_unique_items = new_items - current_items
+            
+            if new_unique_items:  # Only update if there are new unique items
+                # Combine existing items with new unique items
+                all_items = current_items | new_unique_items
+                # Convert back to original case using the new values where possible
+                final_items = []
+                for item in sorted(all_items):
+                    # Try to find original case from new values first, then use lowercase if not found
+                    original_case = next((x.strip() for x in str(new_value).split(',') if x.strip().lower() == item), 
+                                      next((x.strip() for x in str(current_value).split(',') if x.strip().lower() == item),
+                                           item))
+                    final_items.append(original_case)
+                update_data[key] = ', '.join(final_items)
+        else:
+            update_data[key] = new_value
     
-    # Add patient_id to values
-    values.append(patient_id)
+    # Handle notes separately - always append with timestamp
+    if data.get('notes'):
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        current_notes = current_data.get('notes', '')
+        new_notes = f"{current_notes}\n\n[{timestamp}]\n{data['notes']}" if current_notes else f"[{timestamp}]\n{data['notes']}"
+        update_data['notes'] = new_notes
     
-    # Construct and execute the UPDATE query
-    query = f'''
-    UPDATE patient_records 
-    SET {', '.join(updates)}
-    WHERE id = ?
-    '''
+    if update_data:
+        # Construct the update query
+        update_query = 'UPDATE patient_records SET ' + ', '.join(f'{k} = ?' for k in update_data.keys()) + ' WHERE id = ?'
+        cursor.execute(update_query, list(update_data.values()) + [patient_id])
+        conn.commit()
+        print(f"Record updated successfully for patient ID: {patient_id}")
+        
+        # Print what was updated
+        print("\nUpdated fields:")
+        for key, value in update_data.items():
+            if key == 'notes':
+                print(f"{key}: Added new entry with timestamp")
+            else:
+                if current_data.get(key):
+                    current_items = set(str(current_data[key]).lower().split(', '))
+                    new_items = set(str(value).lower().split(', '))
+                    added_items = new_items - current_items
+                    if added_items:
+                        print(f"{key}: Added new items: {', '.join(sorted(added_items))}")
+                    else:
+                        print(f"{key}: No new items to add")
+                else:
+                    print(f"{key}: {value}")
     
-    cursor.execute(query, values)
-    
-    # Commit and close
-    conn.commit()
     conn.close()
-    
-    print(f"Record updated successfully for patient ID: {patient_id}")
 
 def get_patient_record(patient_id: int) -> dict:
     """
@@ -112,10 +205,11 @@ def get_patient_record(patient_id: int) -> dict:
     Returns:
         Dictionary containing the patient record, or None if not found
     """
-    conn = sqlite3.connect('medical_records.db')
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     
-    cursor.execute('SELECT * FROM patient_records WHERE id = ?', (patient_id,))
+    # Use the view that includes calculated age
+    cursor.execute('SELECT * FROM patient_records_with_age WHERE id = ?', (patient_id,))
     record = cursor.fetchone()
     
     if record:
@@ -131,10 +225,11 @@ def get_patient_record(patient_id: int) -> dict:
 
 def get_all_records():
     """Retrieve all records from the database."""
-    conn = sqlite3.connect('medical_records.db')
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     
-    cursor.execute('SELECT * FROM patient_records')
+    # Use the view that includes calculated age
+    cursor.execute('SELECT * FROM patient_records_with_age')
     records = cursor.fetchall()
     
     # Get column names
@@ -150,10 +245,11 @@ def get_all_records():
 
 def list_patients():
     """List all patients with their basic information."""
-    conn = sqlite3.connect('medical_records.db')
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     
-    cursor.execute('SELECT id, first_name, last_name, age, gender FROM patient_records')
+    # Use the view that includes calculated age
+    cursor.execute('SELECT id, first_name, last_name, age, gender FROM patient_records_with_age')
     patients = cursor.fetchall()
     
     if not patients:

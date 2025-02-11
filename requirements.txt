@@ -22,4 +22,5 @@ python-dotenv>=1.0.0
 # Security
 cryptography>=41.0.0
 python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.4 
+passlib[bcrypt]>=1.7.4
+flask==3.0.2 
