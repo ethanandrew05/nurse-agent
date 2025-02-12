@@ -398,15 +398,12 @@
                         recordButton.classList.remove('recording');
                         recordButton.textContent = 'REC';
                         recordStatus.textContent = 'Recording stopped. Processing...';
-                        clearInterval(checkProcessInterval);
+                        clearInterval(checkProcessInterval);  // Stop checking status
                         
-                        // Wait for transcription result
-                        const transcriptionResponse = await response.json();
-                        if (transcriptionResponse.status === 'success') {
-                            recordStatus.textContent = 'Recording processed successfully';
-                        } else {
-                            recordStatus.textContent = 'Error processing recording';
-                        }
+                        // Wait a moment then update status
+                        setTimeout(() => {
+                            recordStatus.textContent = 'Recording processed';
+                        }, 2000);
                     } else {
                         throw new Error('Failed to stop recording');
                     }

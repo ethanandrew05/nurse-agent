@@ -136,6 +136,19 @@
             font-size: 16px;
             display: block;
         }
+
+        .file-timestamp {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        h2 {
+            margin-top: 30px;
+            color: #2c3e50;
+            border-bottom: 2px solid #40B3A2;
+            padding-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -175,24 +188,38 @@
 
             <!-- Transcripts Container -->
             <div class="transcript-container">
-                <h2>Output Files</h2>
+                <h2>Transcriptions</h2>
                 <div class="file-list">
-                    {% if output_files %}
-                        {% for file in output_files %}
+                    {% if transcripts %}
+                        {% for transcript in transcripts %}
                             <div class="file-entry">
-                                <a href="{{ url_for('serve_file', filename=file) }}" target="_blank">
-                                    {% if file.endswith('.txt') %}
-                                        📄 
-                                    {% else %}
-                                        📊 
-                                    {% endif %}
-                                    {{ file }}
+                                <a href="{{ url_for('serve_file', filename=transcript.filename) }}" target="_blank">
+                                    📄 {{ transcript.filename }}
                                 </a>
+                                <div class="file-timestamp">{{ transcript.created_at }}</div>
                             </div>
                         {% endfor %}
                     {% else %}
                         <div class="no-transcripts">
-                            No files available.
+                            No transcriptions available.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <h2>Analysis Files</h2>
+                <div class="file-list">
+                    {% if analyses %}
+                        {% for analysis in analyses %}
+                            <div class="file-entry">
+                                <a href="{{ url_for('serve_file', filename=analysis.filename) }}" target="_blank">
+                                    📊 {{ analysis.filename }}
+                                </a>
+                                <div class="file-timestamp">{{ analysis.created_at }}</div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-transcripts">
+                            No analysis files available.
                         </div>
                     {% endif %}
                 </div>

@@ -397,72 +397,21 @@ def stop_recording():
     
     if recording_process:
         try:
-            # Send SIGUSR1 signal to stop recording
-            os.kill(recording_process.pid, signal.SIGUSR1)
-            
-            try:
-                recording_process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                recording_process.kill()
-            
-            try:
-                patient_id = int(recording_process.args[2])  # Get patient_id from the command arguments
-                output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'output')
+            # Send SIGUSR1 for graceful stop
+            if os.name == 'nt':  # Windows
+                os.kill(recording_process.pid, signal.SIGTERM)
+            else:  # Unix/Linux/MacOS
+                os.kill(recording_process.pid, signal.SIGUSR1)
                 
-                # Get the most recent files
-                transcript_files = [f for f in os.listdir(output_dir) 
-                                 if f.startswith('transcription_') and f.endswith('.txt')]
-                analysis_files = [f for f in os.listdir(output_dir)
-                                if f.startswith('analysis_') and f.endswith('.json')]
-                
-                if transcript_files and analysis_files:
-                    latest_transcript = max(transcript_files, key=lambda x: os.path.getctime(os.path.join(output_dir, x)))
-                    latest_analysis = max(analysis_files, key=lambda x: os.path.getctime(os.path.join(output_dir, x)))
-                    
-                    # Store file information in database
-                    conn = sqlite3.connect('../audio/medical_records.db')
-                    cursor = conn.cursor()
-                    
-                    # Make sure table exists
-                    cursor.execute('''
-                        CREATE TABLE IF NOT EXISTS output_files (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            patient_id INTEGER,
-                            filename TEXT,
-                            file_type TEXT,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            FOREIGN KEY (patient_id) REFERENCES patient_records (id)
-                        )
-                    ''')
-                    
-                    # Store transcript file info
-                    cursor.execute('''
-                        INSERT INTO output_files (patient_id, filename, file_type)
-                        VALUES (?, ?, ?)
-                    ''', (patient_id, latest_transcript, 'transcript'))
-                    
-                    # Store analysis file info
-                    cursor.execute('''
-                        INSERT INTO output_files (patient_id, filename, file_type)
-                        VALUES (?, ?, ?)
-                    ''', (patient_id, latest_analysis, 'analysis'))
-                    
-                    conn.commit()
-                    conn.close()
-                    
-                    return jsonify({"status": "success", "message": "Recording stopped and files stored"})
-                else:
-                    return jsonify({"status": "error", "message": "No output files found"}), 500
-                    
-            except Exception as e:
-                print(f"Error processing files: {e}")
-                traceback.print_exc()
-                return jsonify({"status": "error", "message": f"Failed to process files: {str(e)}"}), 500
-                
-        except Exception as e:
-            return jsonify({"status": "error", "message": str(e)}), 500
-        finally:
+            # Wait briefly for process to clean up
+            recording_process.wait(timeout=2)
             recording_process = None
+            return jsonify({"status": "success", "message": "Recording stopped"})
+        except Exception as e:
+            print(f"Error stopping recording: {e}")
+            traceback.print_exc()
+            recording_process = None
+            return jsonify({"status": "error", "message": str(e)}), 500
     else:
         return jsonify({"status": "error", "message": "No recording in progress"}), 400
 
@@ -477,56 +426,8 @@ def check_recording_status():
             # Process is still running
             return jsonify({"is_recording": True})
         else:
-            # Process has ended, store the files
-            try:
-                patient_id = int(recording_process.args[2])  # Get patient_id from the command arguments
-                output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'output')
-                
-                # Get the most recent files
-                transcript_files = [f for f in os.listdir(output_dir) 
-                                 if f.startswith('transcription_') and f.endswith('.txt')]
-                analysis_files = [f for f in os.listdir(output_dir)
-                                if f.startswith('analysis_') and f.endswith('.json')]
-                
-                if transcript_files and analysis_files:
-                    latest_transcript = max(transcript_files, key=lambda x: os.path.getctime(os.path.join(output_dir, x)))
-                    latest_analysis = max(analysis_files, key=lambda x: os.path.getctime(os.path.join(output_dir, x)))
-                    
-                    # Store file information in database
-                    conn = sqlite3.connect('../audio/medical_records.db')
-                    cursor = conn.cursor()
-                    
-                    # Make sure table exists
-                    cursor.execute('''
-                        CREATE TABLE IF NOT EXISTS output_files (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            patient_id INTEGER,
-                            filename TEXT,
-                            file_type TEXT,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            FOREIGN KEY (patient_id) REFERENCES patient_records (id)
-                        )
-                    ''')
-                    
-                    # Store transcript file info
-                    cursor.execute('''
-                        INSERT INTO output_files (patient_id, filename, file_type)
-                        VALUES (?, ?, ?)
-                    ''', (patient_id, latest_transcript, 'transcript'))
-                    
-                    # Store analysis file info
-                    cursor.execute('''
-                        INSERT INTO output_files (patient_id, filename, file_type)
-                        VALUES (?, ?, ?)
-                    ''', (patient_id, latest_analysis, 'analysis'))
-                    
-                    conn.commit()
-                    conn.close()
-            except Exception as e:
-                print(f"Error storing files: {e}")
-                traceback.print_exc()
-            finally:
-                recording_process = None
+            # Process has ended
+            recording_process = None  # Clear the process
             return jsonify({"is_recording": False})
     else:
         return jsonify({"is_recording": False})
@@ -934,6 +835,19 @@ def transcript(patient_id):
     conn = sqlite3.connect('../audio/medical_records.db')
     cursor = conn.cursor()
     
+    # Create output_files table if it doesn't exist
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS output_files (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            patient_id INTEGER,
+            filename TEXT,
+            file_type TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (patient_id) REFERENCES patient_records (id)
+        )
+    ''')
+    conn.commit()
+    
     # Get all files for this patient
     cursor.execute('''
         SELECT filename, file_type, created_at 
@@ -942,10 +856,22 @@ def transcript(patient_id):
         ORDER BY created_at DESC
     ''', (patient_id,))
     
-    output_files = [row[0] for row in cursor.fetchall()]
+    output_files = cursor.fetchall()
     conn.close()
     
-    return render_template('transcript.html', patient=patient, output_files=output_files)
+    # Organize files by type
+    transcripts = []
+    analyses = []
+    for filename, file_type, created_at in output_files:
+        if file_type == 'transcription':
+            transcripts.append({'filename': filename, 'created_at': created_at})
+        elif file_type == 'analysis':
+            analyses.append({'filename': filename, 'created_at': created_at})
+    
+    return render_template('transcript.html', 
+                         patient=patient, 
+                         transcripts=transcripts,
+                         analyses=analyses)
 
 @app.route('/export_transcripts/<int:patient_id>')
 def export_transcripts(patient_id):
