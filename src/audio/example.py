@@ -12,6 +12,7 @@ import threading
 import sys
 import select
 import signal
+import sqlite3
 
 # Get the absolute path to the database
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -219,20 +220,45 @@ def main():
                     update_record(patient_id, analysis)
                     
                     # Save transcription and analysis to files
-                    with open(text_filename, 'w') as f:
+                    text_filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'web', 'output', os.path.basename(text_filename))
+                    analysis_filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'web', 'output', os.path.basename(analysis_filename))
+                    
+                    # Create output directory if it doesn't exist
+                    os.makedirs(os.path.dirname(text_filepath), exist_ok=True)
+                    
+                    # Save files in web output directory
+                    with open(text_filepath, 'w') as f:
                         f.write(f"Transcription recorded at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
                         f.write("-" * 50 + "\n\n")
                         f.write(text)
                     
-                    with open(analysis_filename, 'w') as f:
+                    with open(analysis_filepath, 'w') as f:
                         json.dump({
                             "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                             "transcription": text,
                             "extracted_information": analysis
                         }, f, indent=2)
                     
-                    print(f"\nTranscription saved to: {text_filename}")
-                    print(f"Analysis saved to: {analysis_filename}")
+                    # Store file references in database
+                    conn = sqlite3.connect(DATABASE_PATH)
+                    cursor = conn.cursor()
+                    
+                    # Add files to output_files table
+                    cursor.execute('''
+                        INSERT INTO output_files (patient_id, filename, file_type)
+                        VALUES (?, ?, ?)
+                    ''', (patient_id, os.path.basename(text_filename), 'transcription'))
+                    
+                    cursor.execute('''
+                        INSERT INTO output_files (patient_id, filename, file_type)
+                        VALUES (?, ?, ?)
+                    ''', (patient_id, os.path.basename(analysis_filename), 'analysis'))
+                    
+                    conn.commit()
+                    conn.close()
+                    
+                    print(f"\nTranscription saved to: {text_filepath}")
+                    print(f"Analysis saved to: {analysis_filepath}")
                     
                     # Display updated patient record
                     print("\nUpdated patient record:")

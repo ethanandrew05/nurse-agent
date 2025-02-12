@@ -139,10 +139,13 @@ def update_record(patient_id: int, data: dict):
             continue
             
         current_value = current_data.get(key)
-        if current_value and key != 'notes':  # Notes are handled separately
+        if current_value in [None, "None", ""]:  # Handle empty or None values
+            # If current value is empty/None, just use the new value
+            update_data[key] = new_value
+        elif key != 'notes':  # Notes are handled separately
             # Split both current and new values into individual items
-            current_items = {item.strip().lower() for item in str(current_value).split(',')}
-            new_items = {item.strip().lower() for item in str(new_value).split(',')}
+            current_items = {item.strip().lower() for item in str(current_value).split(',') if item.strip() and item.strip().lower() != 'none'}
+            new_items = {item.strip().lower() for item in str(new_value).split(',') if item.strip()}
             
             # Only add items that don't exist (case-insensitive comparison)
             new_unique_items = new_items - current_items
@@ -159,14 +162,15 @@ def update_record(patient_id: int, data: dict):
                                            item))
                     final_items.append(original_case)
                 update_data[key] = ', '.join(final_items)
-        else:
-            update_data[key] = new_value
     
     # Handle notes separately - always append with timestamp
     if data.get('notes'):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        current_notes = current_data.get('notes', '')
-        new_notes = f"{current_notes}\n\n[{timestamp}]\n{data['notes']}" if current_notes else f"[{timestamp}]\n{data['notes']}"
+        current_notes = current_data.get('notes')
+        if current_notes in [None, "None", ""]:
+            new_notes = f"[{timestamp}]\n{data['notes']}"
+        else:
+            new_notes = f"{current_notes}\n\n[{timestamp}]\n{data['notes']}"
         update_data['notes'] = new_notes
     
     if update_data:
@@ -182,16 +186,16 @@ def update_record(patient_id: int, data: dict):
             if key == 'notes':
                 print(f"{key}: Added new entry with timestamp")
             else:
-                if current_data.get(key):
-                    current_items = set(str(current_data[key]).lower().split(', '))
-                    new_items = set(str(value).lower().split(', '))
+                if current_data.get(key) in [None, "None", ""]:
+                    print(f"{key}: Set initial value to: {value}")
+                else:
+                    current_items = {item.strip().lower() for item in str(current_data[key]).split(', ') if item.strip() and item.strip().lower() != 'none'}
+                    new_items = {item.strip().lower() for item in str(value).split(', ') if item.strip()}
                     added_items = new_items - current_items
                     if added_items:
                         print(f"{key}: Added new items: {', '.join(sorted(added_items))}")
                     else:
                         print(f"{key}: No new items to add")
-                else:
-                    print(f"{key}: {value}")
     
     conn.close()
 
