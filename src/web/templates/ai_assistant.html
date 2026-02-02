@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,182 +8,300 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
     <style>
         .ai-assistant-container {
-            padding: 20px;
-            height: calc(100vh - 200px);
             display: flex;
             flex-direction: column;
+            height: calc(100vh - 260px);
         }
-        
+
         .chat-interface {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid #F0F0EE;
             overflow: hidden;
             position: relative;
         }
-        
+
         .chat-controls {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 18px;
+            right: 18px;
             z-index: 10;
         }
-        
+
         .clear-history-btn {
-            padding: 6px 12px;
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 4px;
+            padding: 10px 18px;
+            background-color: #FFFFFF;
+            color: #6B6B6B;
+            border: 1px solid #E8E8E6;
+            border-radius: 20px;
             cursor: pointer;
-            font-size: 12px;
-            transition: background-color 0.2s;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-family: inherit;
         }
-        
+
         .clear-history-btn:hover {
-            background-color: #c82333;
+            background-color: #F5F5F3;
+            color: #000000;
+            border-color: #000000;
         }
-        
+
         .chat-messages {
             flex-grow: 1;
-            padding: 20px;
+            padding: 22px;
+            padding-top: 64px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 14px;
         }
-        
+
         .message {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin: 4px 0;
+            max-width: 70%;
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.6;
         }
-        
+
         .user-message {
-            background-color: #007bff;
-            color: white;
+            background-color: #000000;
+            color: #FFFFFF;
             align-self: flex-end;
             border-bottom-right-radius: 4px;
         }
-        
+
         .assistant-message {
-            background-color: #f0f2f5;
-            color: #1c1e21;
+            background-color: #F5F5F3;
+            color: #000000;
             align-self: flex-start;
             border-bottom-left-radius: 4px;
         }
-        
+
         .chat-input {
             display: flex;
-            padding: 15px;
-            background: #f8f9fa;
-            border-top: 1px solid #dee2e6;
-            gap: 10px;
+            padding: 18px 22px;
+            background: #FFFFFF;
+            border-top: 1px solid #F0F0EE;
+            gap: 14px;
+            align-items: flex-end;
         }
-        
+
         .chat-input textarea {
             flex-grow: 1;
-            padding: 12px;
-            border: 1px solid #dee2e6;
+            padding: 14px 18px;
+            border: 1px solid #E8E8E6;
             border-radius: 20px;
             resize: none;
-            font-family: inherit;
+            font-family: 'Inter', sans-serif;
             font-size: 14px;
-            line-height: 1.4;
-            max-height: 100px;
-            min-height: 44px;
+            line-height: 1.5;
+            max-height: 120px;
+            min-height: 48px;
+            background: #FAFAF8;
+            color: #000000;
+            transition: all 0.2s ease;
         }
-        
+
+        .chat-input textarea:focus {
+            outline: none;
+            border-color: #000000;
+            background: #FFFFFF;
+        }
+
+        .chat-input textarea::placeholder {
+            color: #A0A0A0;
+        }
+
         .chat-input button {
-            padding: 8px 20px;
-            background-color: #007bff;
-            color: white;
+            padding: 14px 28px;
+            background-color: #000000;
+            color: #FFFFFF;
             border: none;
             border-radius: 20px;
             cursor: pointer;
             font-size: 14px;
-            transition: background-color 0.2s;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            font-family: inherit;
         }
-        
+
         .chat-input button:hover {
-            background-color: #0056b3;
+            background-color: #333333;
+            transform: translateY(-1px);
         }
-        
+
+        .chat-input button:active {
+            transform: translateY(0);
+        }
+
         .chat-input button:disabled {
-            background-color: #ccc;
+            background-color: #E8E8E6;
+            color: #A0A0A0;
             cursor: not-allowed;
+            transform: none;
         }
-        
+
         .typing-indicator {
             display: none;
-            padding: 12px 16px;
-            background-color: #f0f2f5;
-            border-radius: 12px;
+            padding: 14px 18px;
+            background-color: #F5F5F3;
+            border-radius: 16px;
             align-self: flex-start;
             border-bottom-left-radius: 4px;
-            margin: 4px 0;
         }
-        
+
         .typing-indicator span {
             display: inline-block;
             width: 8px;
             height: 8px;
-            background-color: #90949c;
+            background-color: #A0A0A0;
             border-radius: 50%;
             margin-right: 4px;
-            animation: typing 1s infinite;
+            animation: typing 1.4s infinite;
         }
-        
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-        
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
         @keyframes typing {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-4px);
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="dashboard-container">
-        <!-- Left Sidebar -->
+        <!-- Left Expandable Sidebar -->
         <div class="sidebar">
-            <div class="hospital-logo">Hospital Logo</div>
+            <div class="hospital-logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                        <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                        <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                        <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                    </svg>
+                </div>
+                <span class="logo-text">Nurse Agent</span>
+            </div>
             <nav class="nav-menu">
-                <a href="{{ url_for('index') }}" class="nav-item">ID</a>
-                <a href="{{ url_for('forms', patient_id=patient.id) }}" class="nav-item">Forms</a>
-                <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item">Manual Database Entry System</a>
-                <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="nav-item">Summary Report</a>
-                <a href="{{ url_for('transcript', patient_id=patient.id) }}" class="nav-item">Transcript</a>
-                <a href="{{ url_for('ai_assistant', patient_id=patient.id) }}" class="nav-item active">AI Assistant</a>
+                <a href="{{ url_for('index') }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Patient ID</span>
+                </a>
+                <a href="{{ url_for('forms', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Forms</span>
+                </a>
+                <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Manual Entry</span>
+                </a>
+                <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Summary Report</span>
+                </a>
+                <a href="{{ url_for('transcript', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Transcript</span>
+                </a>
+                <a href="{{ url_for('ai_assistant', patient_id=patient.id) }}" class="nav-item active">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
+                        </svg>
+                    </div>
+                    <span class="nav-text">AI Assistant</span>
+                </a>
             </nav>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Patient Header -->
-            <div class="patient-header">
-                <h1>{{ patient.first_name }} {{ patient.last_name }} - AI Assistant</h1>
-                <div class="patient-info">
-                    <span>AGE: {{ patient.age if patient.age != None else 'Not specified' }}</span>
-                    <span>DOB: {{ patient.date_of_birth if patient.date_of_birth else 'Not specified' }}</span>
-                    <span>SEX: {{ patient.gender if patient.gender else 'Not specified' }}</span>
-                    <span>ID: {{ patient.id }}</span>
+            <!-- Top Header with Navigation Pills -->
+            <div class="top-header">
+                <div class="header-pills">
+                    <a href="{{ url_for('dashboard', patient_id=patient.id) }}" class="header-pill">Dashboard</a>
+                    <a href="{{ url_for('transcript', patient_id=patient.id) }}" class="header-pill">Transcript</a>
+                    <a href="{{ url_for('ai_assistant', patient_id=patient.id) }}" class="header-pill active">AI
+                        Assistant</a>
+                    <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="header-pill">Reports</a>
                 </div>
             </div>
 
-            <!-- AI Assistant Content -->
+            <!-- Page Title -->
+            <div class="page-title-section">
+                <p class="page-subtitle">Chat with your AI medical assistant</p>
+                <h1 class="page-title">AI Assistant</h1>
+            </div>
+
+            <!-- Patient Info Pills -->
+            <div class="patient-info" style="margin-bottom: 22px;">
+                <span>{{ patient.first_name }} {{ patient.last_name }}</span>
+                <span>AGE: {{ patient.age if patient.age != None else 'N/A' }}</span>
+                <span>ID: {{ patient.id }}</span>
+            </div>
+
+            <!-- AI Assistant Chat -->
             <div class="ai-assistant-container">
                 <div class="chat-interface">
                     <div class="chat-controls">
                         <button onclick="clearHistory()" class="clear-history-btn">Clear History</button>
                     </div>
                     <div class="chat-messages" id="chatMessages">
-                        <div class="assistant-message">
-                            Hello! I'm your AI assistant. I have access to the patient's medical records and can help answer any questions you have.
+                        <div class="message assistant-message">
+                            Hello! I'm your AI assistant. I have access to the patient's medical records and can help
+                            answer any questions you have.
                         </div>
                     </div>
                     <div class="typing-indicator" id="typingIndicator">
@@ -191,10 +310,7 @@
                         <span></span>
                     </div>
                     <div class="chat-input">
-                        <textarea 
-                            id="messageInput" 
-                            placeholder="Type your message here..."
-                            rows="1"
+                        <textarea id="messageInput" placeholder="Type your message here..." rows="1"
                             onkeydown="if(event.keyCode === 13 && !event.shiftKey) { event.preventDefault(); sendMessage(); }">
                         </textarea>
                         <button onclick="sendMessage()" id="sendButton">Send</button>
@@ -206,7 +322,7 @@
 
     <script>
         // Initialize patient data from server-side rendered values
-        const patientData = JSON.parse('{{ patient|tojson|safe }}');
+        const patientData = {{ patient| tojson | safe }};
 
         const chatMessages = document.getElementById('chatMessages');
         const messageInput = document.getElementById('messageInput');
@@ -298,10 +414,11 @@
         }
 
         // Auto-resize textarea as user types
-        messageInput.addEventListener('input', function() {
+        messageInput.addEventListener('input', function () {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
         });
     </script>
 </body>
-</html> 
+
+</html>

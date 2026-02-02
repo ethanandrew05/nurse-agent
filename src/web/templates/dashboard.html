@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +14,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.4);
             z-index: 1000;
+            backdrop-filter: blur(4px);
         }
 
         .alert-box {
@@ -23,17 +25,18 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
+            padding: 32px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            max-width: 480px;
             width: 90%;
             z-index: 1001;
         }
 
         .alert-title {
-            color: #d32f2f;
-            font-size: 24px;
+            color: #FF6B35;
+            font-size: 18px;
+            font-weight: 600;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
@@ -41,93 +44,109 @@
         }
 
         .alert-content {
-            margin-bottom: 20px;
-            line-height: 1.5;
+            margin-bottom: 24px;
+            line-height: 1.6;
+            color: #4A4A4A;
+            font-size: 14px;
         }
 
         .alert-close {
-            background-color: #40B3A2;
+            background-color: #000000;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 24px;
+            border-radius: 12px;
             cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
             float: right;
+            transition: all 0.2s ease;
         }
 
         .alert-close:hover {
-            background-color: #359385;
+            background-color: #333333;
         }
 
         .record-button {
-            width: 80px;
-            height: 80px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            background-color: #ff4444;
+            background-color: #FF4757;
             border: none;
             color: white;
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 20px auto;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin: 0 auto 14px;
+            box-shadow: 0 4px 20px rgba(255, 71, 87, 0.25);
         }
 
         .record-button.recording {
-            background-color: #666;
+            background-color: #000000;
             animation: pulse 2s infinite;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
         @keyframes pulse {
             0% {
                 transform: scale(1);
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             }
+
             50% {
                 transform: scale(1.05);
-                box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+                box-shadow: 0 8px 30px rgba(255, 71, 87, 0.4);
             }
+
             100% {
                 transform: scale(1);
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             }
         }
 
         .record-status {
             text-align: center;
-            margin-top: 10px;
-            font-weight: bold;
-            color: #666;
-            padding: 10px;
-            border-radius: 4px;
+            font-weight: 500;
+            color: #8A8A8A;
+            font-size: 13px;
+            padding: 10px 16px;
+            border-radius: 10px;
             transition: all 0.3s ease;
         }
-        
+
         .record-status.processing {
-            background-color: #fff3cd;
-            color: #856404;
+            background-color: #FFF8E5;
+            color: #B8860B;
         }
-        
+
         .record-status.success {
-            background-color: #d4edda;
-            color: #155724;
+            background-color: #E8F8E8;
+            color: #2E7D32;
         }
-        
+
         .record-status.error {
-            background-color: #f8d7da;
-            color: #721c24;
+            background-color: #FFE5E5;
+            color: #C62828;
         }
     </style>
 </head>
+
 <body>
     <!-- Alert Overlay -->
     <div id="alertOverlay" class="alert-overlay">
         <div class="alert-box">
             <div class="alert-title">
-                ⚠️ IMPORTANT INFORMATION
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                    </path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                Important Information
             </div>
             <div id="alertContent" class="alert-content">
             </div>
@@ -136,66 +155,205 @@
     </div>
 
     <div class="dashboard-container">
-        <!-- Left Sidebar -->
+        <!-- Left Expandable Sidebar -->
         <div class="sidebar">
-            <div class="hospital-logo">Hospital Logo</div>
+            <div class="hospital-logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                        <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                        <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                        <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                    </svg>
+                </div>
+                <span class="logo-text">Nurse Agent</span>
+            </div>
             <nav class="nav-menu">
-                <a href="{{ url_for('index') }}" class="nav-item">ID</a>
-                <a href="{{ url_for('forms', patient_id=patient.id) }}" class="nav-item">Forms</a>
-                <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item">Manual Database Entry System</a>
-                <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="nav-item">Summary Report</a>
-                <a href="{{ url_for('transcript', patient_id=patient.id) }}" class="nav-item">Transcript</a>
-                <a href="{{ url_for('ai_assistant', patient_id=patient.id) }}" class="nav-item">AI Assistant</a>
+                <a href="{{ url_for('index') }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Patient ID</span>
+                </a>
+                <a href="{{ url_for('forms', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Forms</span>
+                </a>
+                <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Manual Entry</span>
+                </a>
+                <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Summary Report</span>
+                </a>
+                <a href="{{ url_for('transcript', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Transcript</span>
+                </a>
+                <a href="{{ url_for('ai_assistant', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
+                        </svg>
+                    </div>
+                    <span class="nav-text">AI Assistant</span>
+                </a>
             </nav>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Patient Header -->
-            <div class="patient-header">
-                <h1>{{ patient.first_name }} {{ patient.last_name }}</h1>
-                <div class="patient-info">
-                    <span>AGE: {{ patient.age if patient.age != None else 'Not specified' }}</span>
-                    <span>DOB: {{ patient.date_of_birth if patient.date_of_birth else 'Not specified' }}</span>
-                    <span>SEX: {{ patient.gender if patient.gender else 'Not specified' }}</span>
-                    <span>ID: {{ patient.id }}</span>
+            <!-- Top Header with Navigation Pills -->
+            <div class="top-header">
+                <div class="header-pills">
+                    <a href="{{ url_for('index') }}" class="header-pill">Home</a>
+                    <a href="{{ url_for('forms', patient_id=patient.id) }}" class="header-pill">Forms</a>
+                    <a href="{{ url_for('dashboard', patient_id=patient.id) }}" class="header-pill active">Dashboard</a>
+                    <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="header-pill">Reports</a>
                 </div>
             </div>
 
-            <!-- Information Grid -->
+            <!-- Page Title -->
+            <div class="page-title-section">
+                <p class="page-subtitle">Manage and track patient health</p>
+                <h1 class="page-title">{{ patient.first_name }} {{ patient.last_name }}</h1>
+            </div>
+
+            <!-- Patient Info Pills -->
+            <div class="patient-info" style="margin-bottom: 28px;">
+                <span>AGE: {{ patient.age if patient.age != None else 'Not specified' }}</span>
+                <span>DOB: {{ patient.date_of_birth if patient.date_of_birth else 'Not specified' }}</span>
+                <span>SEX: {{ patient.gender if patient.gender else 'Not specified' }}</span>
+                <span>ID: {{ patient.id }}</span>
+            </div>
+
+            <!-- Info Cards Grid -->
             <div class="info-grid">
+                <!-- Important Information Card -->
                 <div class="info-box important-info">
-                    <h2>IMPORTANT INFORMATION</h2>
+                    <div class="info-box-header">
+                        <h2>Important Information</h2>
+                        <div class="info-box-action">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                                </path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                    </div>
                     <p>{{ patient.notes }}</p>
                 </div>
 
+                <!-- Medical History Card -->
                 <div class="info-box medical-history">
-                    <h2>Medical History</h2>
+                    <div class="info-box-header">
+                        <h2>Medical History</h2>
+                        <div class="info-box-action">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                        </div>
+                    </div>
                     <p>{{ patient.medical_history }}</p>
                 </div>
 
+                <!-- Medications Card -->
                 <div class="info-box medications">
-                    <h2>Medications</h2>
+                    <div class="info-box-header">
+                        <h2>Medications</h2>
+                        <div class="info-box-action">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="12" y1="8" x2="12" y2="16"></line>
+                                <line x1="8" y1="12" x2="16" y2="12"></line>
+                            </svg>
+                        </div>
+                    </div>
                     <p>{{ patient.medications }}</p>
                 </div>
 
+                <!-- Allergies Card -->
                 <div class="info-box allergies">
-                    <h2>Allergies</h2>
+                    <div class="info-box-header">
+                        <h2>Allergies</h2>
+                        <div class="info-box-action">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                        </div>
+                    </div>
                     <p>{{ patient.allergies }}</p>
                 </div>
 
+                <!-- Notes Card -->
                 <div class="info-box notes">
-                    <h2>Notes</h2>
+                    <div class="info-box-header">
+                        <h2>Notes</h2>
+                        <div class="info-box-action">
+                            <svg viewBox="0 0 24 24">
+                                <line x1="17" y1="10" x2="3" y2="10"></line>
+                                <line x1="21" y1="6" x2="3" y2="6"></line>
+                                <line x1="21" y1="14" x2="3" y2="14"></line>
+                                <line x1="17" y1="18" x2="3" y2="18"></line>
+                            </svg>
+                        </div>
+                    </div>
                     <p>{{ patient.notes }}</p>
                 </div>
-            </div>
 
-            <!-- Record Button Section -->
-            <div class="record-section">
-                <button id="recordButton" class="record-button">
-                    REC
-                </button>
-                <div id="recordStatus" class="record-status">Click to start recording</div>
+                <!-- Record Section Card -->
+                <div class="info-box">
+                    <div class="info-box-header">
+                        <h2>Voice Recording</h2>
+                        <div class="info-box-action">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                <line x1="12" y1="19" x2="12" y2="23"></line>
+                                <line x1="8" y1="23" x2="16" y2="23"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <button id="recordButton" class="record-button">
+                        REC
+                    </button>
+                    <div id="recordStatus" class="record-status">Click to start recording</div>
+                </div>
             </div>
         </div>
     </div>
@@ -203,12 +361,10 @@
     <script>
         function showAlert(alerts) {
             if (alerts && alerts.length > 0) {
-                // Update popup content
                 const alertContent = document.getElementById('alertContent');
                 alertContent.innerHTML = alerts.map(alert => `<p>• ${alert}</p>`).join('');
                 document.getElementById('alertOverlay').style.display = 'block';
-                
-                // Update dashboard's Important Information section
+
                 const importantInfoBox = document.querySelector('.info-box.important-info p');
                 importantInfoBox.innerHTML = alerts.map(alert => `<p>• ${alert}</p>`).join('');
             }
@@ -218,7 +374,6 @@
             document.getElementById('alertOverlay').style.display = 'none';
         }
 
-        // Initialize patient data from server-side
         const patientData = {
             id: "{{ patient.id }}",
             allergies: "{{ patient.allergies | default('', true) | replace('\n', ' ') | replace('\"', '\'') }}",
@@ -227,7 +382,6 @@
             medications: "{{ patient.medications | default('', true) | replace('\n', ' ') | replace('\"', '\'') }}"
         };
 
-        // Lists of critical conditions and medications
         const criticalConditions = {
             cardiac: ['heart', 'cardiac', 'hypertension', 'high blood pressure', 'arrhythmia', 'angina'],
             respiratory: ['asthma', 'copd', 'emphysema', 'respiratory failure'],
@@ -240,86 +394,79 @@
         };
 
         const highRiskMedications = [
-            'warfarin', 'coumadin', 'heparin',  // Blood thinners
-            'insulin', 'metformin',             // Diabetes
-            'morphine', 'oxycodone', 'fentanyl', // Opioids
-            'lithium', 'clozapine',             // Psychiatric
-            'chemotherapy', 'immunosuppressant', // Cancer/Immune
-            'digoxin', 'amiodarone'             // Heart
+            'warfarin', 'coumadin', 'heparin',
+            'insulin', 'metformin',
+            'morphine', 'oxycodone', 'fentanyl',
+            'lithium', 'clozapine',
+            'chemotherapy', 'immunosuppressant',
+            'digoxin', 'amiodarone'
         ];
 
         const criticalAllergies = [
             'penicillin', 'sulfa', 'aspirin', 'nsaid', 'latex', 'iodine', 'contrast'
         ];
 
-        // Function to gather important information
         function gatherImportantInformation() {
             const alerts = [];
-            
-            // Check allergies - only highlight critical ones
+
             if (patientData.allergies) {
                 const allergyText = patientData.allergies.toLowerCase();
-                const foundCriticalAllergies = criticalAllergies.filter(allergy => 
+                const foundCriticalAllergies = criticalAllergies.filter(allergy =>
                     allergyText.includes(allergy.toLowerCase())
                 );
-                
+
                 if (foundCriticalAllergies.length > 0) {
-                    alerts.push(`<strong>⚠️ CRITICAL ALLERGIES:</strong> ${patientData.allergies}`);
+                    alerts.push(`<strong>CRITICAL ALLERGIES:</strong> ${patientData.allergies}`);
                 }
             }
 
-            // Check medical history for critical conditions
             if (patientData.medicalHistory) {
                 const medHistory = patientData.medicalHistory.toLowerCase();
                 const foundConditions = [];
-                
+
                 for (const [system, conditions] of Object.entries(criticalConditions)) {
                     if (conditions.some(condition => medHistory.includes(condition))) {
                         foundConditions.push(system);
                     }
                 }
-                
+
                 if (foundConditions.length > 0) {
-                    alerts.push(`<strong>⚠️ CRITICAL MEDICAL HISTORY (${foundConditions.join(', ')}):</strong> ${patientData.medicalHistory}`);
+                    alerts.push(`<strong>CRITICAL MEDICAL HISTORY (${foundConditions.join(', ')}):</strong> ${patientData.medicalHistory}`);
                 }
             }
 
-            // Check family history - only if it contains critical conditions
             if (patientData.familyHistory) {
                 const famHistory = patientData.familyHistory.toLowerCase();
                 const foundFamilyConditions = [];
-                
+
                 for (const [system, conditions] of Object.entries(criticalConditions)) {
                     if (conditions.some(condition => famHistory.includes(condition))) {
                         foundFamilyConditions.push(system);
                     }
                 }
-                
+
                 if (foundFamilyConditions.length > 0) {
                     alerts.push(`<strong>RELEVANT FAMILY HISTORY (${foundFamilyConditions.join(', ')}):</strong> ${patientData.familyHistory}`);
                 }
             }
 
-            // Check current medications - only highlight high-risk ones
             if (patientData.medications) {
                 const medsText = patientData.medications.toLowerCase();
-                const foundHighRiskMeds = highRiskMedications.filter(med => 
+                const foundHighRiskMeds = highRiskMedications.filter(med =>
                     medsText.includes(med.toLowerCase())
                 );
-                
+
                 if (foundHighRiskMeds.length > 0) {
-                    alerts.push(`<strong>⚠️ HIGH-RISK MEDICATIONS:</strong> ${patientData.medications}`);
+                    alerts.push(`<strong>HIGH-RISK MEDICATIONS:</strong> ${patientData.medications}`);
                 }
             }
 
             return alerts;
         }
 
-        // Check for important information when page loads
-        window.onload = function() {
+        window.onload = function () {
             const alerts = gatherImportantInformation();
-            
-            // Always update the dashboard's Important Information section
+
             const importantInfoBox = document.querySelector('.info-box.important-info p');
             if (alerts.length > 0) {
                 importantInfoBox.innerHTML = alerts.map(alert => `<p>• ${alert}</p>`).join('');
@@ -327,7 +474,6 @@
                 importantInfoBox.innerHTML = '<p>No critical information to display.</p>';
             }
 
-            // Only show the popup if we haven't shown it before for this patient
             const alertShownKey = `alertShown_patient_${patientData.id}`;
             if (!sessionStorage.getItem(alertShownKey) && alerts.length > 0) {
                 showAlert(alerts);
@@ -335,7 +481,6 @@
             }
         };
 
-        // Recording functionality
         let isRecording = false;
         let checkProcessInterval = null;
         const recordButton = document.getElementById('recordButton');
@@ -346,7 +491,6 @@
                 const response = await fetch('/check_recording_status');
                 const data = await response.json();
                 if (!data.is_recording && isRecording) {
-                    // Recording has stopped automatically
                     isRecording = false;
                     recordButton.classList.remove('recording');
                     recordButton.textContent = 'REC';
@@ -358,9 +502,8 @@
             }
         }
 
-        recordButton.addEventListener('click', async function() {
+        recordButton.addEventListener('click', async function () {
             if (!isRecording) {
-                // Start recording
                 try {
                     const response = await fetch(`/start_recording/${patientData.id}`, {
                         method: 'POST',
@@ -374,7 +517,6 @@
                         recordButton.classList.add('recording');
                         recordButton.textContent = 'STOP';
                         recordStatus.textContent = 'Recording in progress...';
-                        // Start checking recording status every second
                         checkProcessInterval = setInterval(checkRecordingProcess, 1000);
                     } else {
                         throw new Error('Failed to start recording');
@@ -384,7 +526,6 @@
                     recordStatus.textContent = 'Error starting recording';
                 }
             } else {
-                // Stop recording
                 try {
                     const response = await fetch('/stop_recording', {
                         method: 'POST',
@@ -398,9 +539,8 @@
                         recordButton.classList.remove('recording');
                         recordButton.textContent = 'REC';
                         recordStatus.textContent = 'Recording stopped. Processing...';
-                        clearInterval(checkProcessInterval);  // Stop checking status
-                        
-                        // Wait a moment then update status
+                        clearInterval(checkProcessInterval);
+
                         setTimeout(() => {
                             recordStatus.textContent = 'Recording processed';
                         }, 2000);
@@ -419,17 +559,8 @@
                 const response = await fetch(`/get_patient_data/${patientData.id}`);
                 if (response.ok) {
                     const data = await response.json();
-                    // Update the displayed information
-                    document.querySelector('.patient-header h1').textContent = `${data.first_name} ${data.last_name}`;
-                    const patientInfo = document.querySelector('.patient-info');
-                    patientInfo.innerHTML = `
-                        <span>AGE: ${data.age}</span>
-                        <span>DOB: ${data.date_of_birth}</span>
-                        <span>SEX: ${data.gender}</span>
-                        <span>ID: ${data.id}</span>
-                    `;
-                    
-                    // Update other fields
+                    document.querySelector('.page-title').textContent = `${data.first_name} ${data.last_name}`;
+
                     if (data.medical_history) {
                         document.querySelector('.medical-history p').textContent = data.medical_history;
                     }
@@ -442,11 +573,9 @@
                     if (data.notes) {
                         document.querySelector('.notes p').textContent = data.notes;
                     }
-                    
-                    // Update patientData object
+
                     Object.assign(patientData, data);
-                    
-                    // Refresh alerts
+
                     const alerts = gatherImportantInformation();
                     const importantInfoBox = document.querySelector('.info-box.important-info p');
                     if (alerts.length > 0) {
@@ -460,8 +589,8 @@
             }
         }
 
-        // Refresh data every 30 seconds
         setInterval(refreshPatientData, 30000);
     </script>
 </body>
-</html> 
+
+</html>
