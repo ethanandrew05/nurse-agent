@@ -4,210 +4,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nurse Agent - Patient ID</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #F8F8F6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: #1A1A1A;
-        }
-
-        .login-container {
-            width: 100%;
-            max-width: 420px;
-            padding: 20px;
-        }
-
-        .login-box {
-            background: #FFFFFF;
-            border-radius: 24px;
-            padding: 48px 40px;
-            border: 1px solid #EBEBEB;
-        }
-
-        .hospital-logo h1 {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1A1A1A;
-            text-align: center;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-
-        .hospital-logo p {
-            font-size: 14px;
-            color: #9B9B9B;
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .login-form h2 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1A1A1A;
-            margin-bottom: 24px;
-            text-align: center;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 16px 20px;
-            font-size: 15px;
-            border: 1px solid #E5E5E5;
-            border-radius: 16px;
-            background: #F8F8F6;
-            color: #1A1A1A;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.2s ease;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #1A1A1A;
-            background: #FFFFFF;
-        }
-
-        .input-group input::placeholder {
-            color: #9B9B9B;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 16px;
-            background-color: #1A1A1A;
-            color: #FFFFFF;
-            border: none;
-            border-radius: 16px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .submit-btn:hover {
-            background-color: #2A2A2A;
-            transform: translateY(-1px);
-        }
-
-        .submit-btn:active {
-            transform: translateY(0);
-        }
-
-        .error-message {
-            background-color: #FFF5F5;
-            color: #C53030;
-            padding: 14px 18px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            border: 1px solid #FED7D7;
-            text-align: center;
-        }
-
-        .success-message {
-            background-color: #F0FFF4;
-            color: #22543D;
-            padding: 14px 18px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            border: 1px solid #C6F6D5;
-            text-align: center;
-        }
-
-        .button-container {
-            margin-top: 16px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .create-btn {
-            background-color: #FFFFFF;
-            color: #1A1A1A;
-            border: 1px solid #E5E5E5;
-            padding: 14px 28px;
-            border-radius: 16px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            font-family: 'Inter', sans-serif;
-            width: 100%;
-        }
-
-        .create-btn:hover {
-            background-color: #F8F8F6;
-            border-color: #1A1A1A;
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 24px 0;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #E5E5E5;
-        }
-
-        .divider span {
-            padding: 0 16px;
-            color: #9B9B9B;
-            font-size: 13px;
-        }
-    </style>
+    <title>Nurse Agent - Patient Selection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
-    <div class="login-container">
-        <div class="login-box">
-            <div class="hospital-logo">
-                <h1>Nurse Agent</h1>
-                <p>Medical Documentation Assistant</p>
-            </div>
-            <form action="{{ url_for('verify_patient') }}" method="POST" class="login-form">
-                <h2>Enter Patient ID</h2>
-                {% if error %}
-                <div class="error-message">{{ error }}</div>
-                {% endif %}
-                {% if success %}
-                <div class="success-message">{{ success }}</div>
-                {% endif %}
-                <div class="input-group">
-                    <input type="text" id="patient_id" name="patient_id" required placeholder="Patient ID"
-                        autocomplete="off">
-                </div>
-                <button type="submit" class="submit-btn">Access Patient Records</button>
-            </form>
-            <div class="divider">
-                <span>or</span>
-            </div>
-            <div class="button-container">
-                <form action="{{ url_for('create_new_patient') }}" method="POST" style="width: 100%;">
-                    <button type="submit" class="create-btn">Create New Patient</button>
-                </form>
+    <div class="login-wrapper">
+        <!-- Illustration Side -->
+        <div class="illustration-container">
+            <div class="illustration-content">
+                <!-- Medical Team Illustration -->
+                <img src="{{ url_for('static', filename='images/login_illustration.png') }}" alt="Nurse Agent Team"
+                    class="illustration-svg">
+
             </div>
         </div>
+
+        <!-- Login Form Side -->
+        <div class="login-container">
+            <div class="login-header">
+                <h1 class="login-title">Patient Selection</h1>
+                <p class="login-subtitle">Enter patient ID to access records (eg. 1)</p>
+            </div>
+
+            {% if error %}
+            <div class="error-message">⚠️ {{ error }}</div>
+            {% endif %}
+            {% if success %}
+            <div class="success-message">✅ {{ success }}</div>
+            {% endif %}
+
+            <form action="{{ url_for('verify_patient') }}" method="POST" class="login-form">
+                <div class="input-group">
+                    <label class="input-label" for="patient_id">Patient ID</label>
+                    <input type="text" id="patient_id" name="patient_id" required placeholder="Enter your Patient ID"
+                        autocomplete="off">
+                </div>
+
+                <button type="submit" class="submit-btn" style="width: 100%">Continue</button>
+            </form>
+
+            <form action="{{ url_for('create_new_patient') }}" method="POST" style="margin-top: 12px;">
+                <button type="submit" class="submit-btn secondary" style="width: 100%">Create New Patient</button>
+            </form>
+        </div>
+    </div>
     </div>
 </body>
 
