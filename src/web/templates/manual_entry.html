@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,18 +8,82 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/manual_entry.css') }}">
 </head>
+
 <body>
     <div class="dashboard-container">
-        <!-- Left Sidebar -->
+        <!-- Left Expandable Sidebar -->
         <div class="sidebar">
-            <div class="hospital-logo">Hospital Logo</div>
+            <div class="hospital-logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                        <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                        <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                        <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                    </svg>
+                </div>
+                <span class="logo-text">Nurse Agent</span>
+            </div>
             <nav class="nav-menu">
-                <a href="{{ url_for('index') }}" class="nav-item">ID</a>
-                <a href="{{ url_for('forms', patient_id=patient.id) }}" class="nav-item">Forms</a>
-                <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item active">Manual Database Entry System</a>
-                <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="nav-item">Summary Report</a>
-                <a href="{{ url_for('transcript', patient_id=patient.id) }}" class="nav-item">Transcript</a>
-                <a href="{{ url_for('ai_assistant', patient_id=patient.id) }}" class="nav-item">AI Assistant</a>
+                <a href="{{ url_for('index') }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Patient ID</span>
+                </a>
+                <a href="{{ url_for('forms', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Forms</span>
+                </a>
+                <a href="{{ url_for('manual_entry', patient_id=patient.id) }}" class="nav-item active">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Manual Entry</span>
+                </a>
+                <a href="{{ url_for('summary_report', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Summary Report</span>
+                </a>
+                <a href="{{ url_for('transcript', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Transcript</span>
+                </a>
+                <a href="{{ url_for('ai_assistant', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
+                        </svg>
+                    </div>
+                    <span class="nav-text">AI Assistant</span>
+                </a>
             </nav>
         </div>
 
@@ -34,7 +99,8 @@
             </div>
 
             <!-- Manual Entry Form -->
-            <form action="{{ url_for('update_patient', patient_id=patient.id) }}" method="POST" class="entry-form" onsubmit="handleSubmit(event)">
+            <form action="{{ url_for('update_patient', patient_id=patient.id) }}" method="POST" class="entry-form"
+                onsubmit="handleSubmit(event)">
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="first_name">First Name</label>
@@ -98,7 +164,8 @@
 
                     <div class="form-group">
                         <label for="follow_up_date">Follow-up Date</label>
-                        <input type="date" id="follow_up_date" name="follow_up_date" value="{{ patient.follow_up_date }}">
+                        <input type="date" id="follow_up_date" name="follow_up_date"
+                            value="{{ patient.follow_up_date }}">
                     </div>
 
                     <div class="form-group full-width">
@@ -116,29 +183,30 @@
     </div>
 
     <script>
-    async function handleSubmit(event) {
-        event.preventDefault();
-        const form = event.target;
-        
-        try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form)
-            });
-            
-            if (response.ok) {
-                // Redirect to dashboard with a small delay to allow database update
-                setTimeout(() => {
-                    window.location.href = "{{ url_for('dashboard', patient_id=patient.id) }}";
-                }, 500);
-            } else {
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form)
+                });
+
+                if (response.ok) {
+                    // Redirect to dashboard with a small delay to allow database update
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('dashboard', patient_id=patient.id) }}";
+                    }, 500);
+                } else {
+                    alert('Error updating patient record');
+                }
+            } catch (error) {
+                console.error('Error:', error);
                 alert('Error updating patient record');
             }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error updating patient record');
         }
-    }
     </script>
 </body>
-</html> 
+
+</html>
