@@ -84,6 +84,17 @@
                     </div>
                     <span class="nav-text">Patient ID</span>
                 </a>
+                <a href="{{ url_for('dashboard', patient_id=patient.id) }}" class="nav-item">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+                            <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+                            <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+                            <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Dashboard</span>
+                </a>
                 <a href="{{ url_for('forms', patient_id=patient.id) }}" class="nav-item active">
                     <div class="nav-icon">
                         <svg viewBox="0 0 24 24">

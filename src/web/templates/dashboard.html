@@ -7,6 +7,7 @@
     <title>Patient Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
     <style>
+        /* Alert */
         .alert-overlay {
             display: none;
             position: fixed;
@@ -14,9 +15,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.35);
             z-index: 1000;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         .alert-box {
@@ -24,19 +26,34 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 32px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 36px;
+            border-radius: 24px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.6);
             max-width: 480px;
             width: 90%;
             z-index: 1001;
+            animation: alertSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes alertSlideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -45%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
         }
 
         .alert-title {
             color: #FF6B35;
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 17px;
+            font-weight: 700;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
@@ -45,66 +62,80 @@
 
         .alert-content {
             margin-bottom: 24px;
-            line-height: 1.6;
+            line-height: 1.7;
             color: #4A4A4A;
             font-size: 14px;
         }
 
         .alert-close {
-            background-color: #000000;
+            background: linear-gradient(135deg, #1A1A2E, #2D2D44);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
+            padding: 12px 28px;
+            border-radius: 14px;
             cursor: pointer;
             font-weight: 600;
             font-size: 14px;
             float: right;
-            transition: all 0.2s ease;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 16px rgba(26, 26, 46, 0.2);
         }
 
         .alert-close:hover {
-            background-color: #333333;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(26, 26, 46, 0.25);
+        }
+
+        /* Record button */
+        .record-button-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            padding: 8px 0;
         }
 
         .record-button {
             width: 72px;
             height: 72px;
             border-radius: 50%;
-            background-color: #FF4757;
+            background: linear-gradient(135deg, #FF4757, #FF6B6B);
             border: none;
             color: white;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 12px;
+            letter-spacing: 1px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 14px;
-            box-shadow: 0 4px 20px rgba(255, 71, 87, 0.25);
+            box-shadow: 0 6px 24px rgba(255, 71, 87, 0.3), 0 0 0 0 rgba(255, 71, 87, 0.3);
+            position: relative;
+        }
+
+        .record-button:hover {
+            transform: scale(1.06);
+            box-shadow: 0 8px 32px rgba(255, 71, 87, 0.4), 0 0 0 0 rgba(255, 71, 87, 0.3);
         }
 
         .record-button.recording {
-            background-color: #000000;
-            animation: pulse 2s infinite;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #1A1A2E, #2D2D44);
+            animation: pulseRing 2s ease-out infinite;
+            box-shadow: 0 6px 24px rgba(26, 26, 46, 0.3);
         }
 
-        @keyframes pulse {
+        @keyframes pulseRing {
             0% {
-                transform: scale(1);
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 6px 24px rgba(26, 26, 46, 0.3), 0 0 0 0 rgba(255, 71, 87, 0.4);
             }
 
-            50% {
-                transform: scale(1.05);
-                box-shadow: 0 8px 30px rgba(255, 71, 87, 0.4);
+            70% {
+                box-shadow: 0 6px 24px rgba(26, 26, 46, 0.3), 0 0 0 18px rgba(255, 71, 87, 0);
             }
 
             100% {
-                transform: scale(1);
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 6px 24px rgba(26, 26, 46, 0.3), 0 0 0 0 rgba(255, 71, 87, 0);
             }
         }
 
@@ -113,24 +144,40 @@
             font-weight: 500;
             color: #8A8A8A;
             font-size: 13px;
-            padding: 10px 16px;
-            border-radius: 10px;
+            padding: 10px 18px;
+            border-radius: 12px;
             transition: all 0.3s ease;
         }
 
         .record-status.processing {
-            background-color: #FFF8E5;
+            background: linear-gradient(135deg, rgba(255, 248, 229, 0.8), rgba(255, 243, 205, 0.8));
             color: #B8860B;
         }
 
         .record-status.success {
-            background-color: #E8F8E8;
+            background: linear-gradient(135deg, rgba(232, 248, 232, 0.8), rgba(220, 245, 220, 0.8));
             color: #2E7D32;
         }
 
         .record-status.error {
-            background-color: #FFE5E5;
+            background: linear-gradient(135deg, rgba(255, 229, 229, 0.8), rgba(255, 220, 220, 0.8));
             color: #C62828;
+        }
+
+        /* Greeting section */
+        .greeting-section {
+            margin-bottom: 6px;
+        }
+
+        .greeting-text {
+            font-size: 14px;
+            color: #8E8E93;
+            font-weight: 500;
+        }
+
+        .greeting-text .greeting-emoji {
+            font-size: 18px;
+            margin-right: 4px;
         }
     </style>
 </head>
@@ -178,6 +225,17 @@
                         </svg>
                     </div>
                     <span class="nav-text">Patient ID</span>
+                </a>
+                <a href="{{ url_for('dashboard', patient_id=patient.id) }}" class="nav-item active">
+                    <div class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+                            <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+                            <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+                            <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+                        </svg>
+                    </div>
+                    <span class="nav-text">Dashboard</span>
                 </a>
                 <a href="{{ url_for('forms', patient_id=patient.id) }}" class="nav-item">
                     <div class="nav-icon">
@@ -243,9 +301,13 @@
                 </div>
             </div>
 
-            <!-- Page Title -->
+            <!-- Greeting + Page Title -->
+            <div class="greeting-section">
+                <p class="greeting-text"><span class="greeting-emoji" id="greetingEmoji">👋</span> <span
+                        id="greetingText">Good evening</span></p>
+            </div>
             <div class="page-title-section">
-                <p class="page-subtitle">Manage and track patient health</p>
+                <p class="page-subtitle">Patient Overview</p>
                 <h1 class="page-title">{{ patient.first_name }} {{ patient.last_name }}</h1>
             </div>
 
@@ -349,16 +411,35 @@
                             </svg>
                         </div>
                     </div>
-                    <button id="recordButton" class="record-button">
-                        REC
-                    </button>
-                    <div id="recordStatus" class="record-status">Click to start recording</div>
+                    <div class="record-button-wrapper">
+                        <button id="recordButton" class="record-button">
+                            REC
+                        </button>
+                        <div id="recordStatus" class="record-status">Click to start recording</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Dynamic greeting based on time of day
+        (function setGreeting() {
+            const hour = new Date().getHours();
+            const greetingEl = document.getElementById('greetingText');
+            const emojiEl = document.getElementById('greetingEmoji');
+            if (hour < 12) {
+                greetingEl.textContent = 'Good morning';
+                emojiEl.textContent = '☀️';
+            } else if (hour < 17) {
+                greetingEl.textContent = 'Good afternoon';
+                emojiEl.textContent = '👋';
+            } else {
+                greetingEl.textContent = 'Good evening';
+                emojiEl.textContent = '🌙';
+            }
+        })();
+
         function showAlert(alerts) {
             if (alerts && alerts.length > 0) {
                 const alertContent = document.getElementById('alertContent');
